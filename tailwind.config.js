@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       backgroundImage: {
-        'hero-pattern': "url('/images/ball.png')",
-        'footer-texture': "url('/img/footer-texture.png')",
+        'ball': "url('/images/ball.png')",
+        'service': "url('/images/service.png')",
       }
     },
   },
