@@ -1,31 +1,66 @@
 import { useState } from "react";
+import Stack from './../backend/stack';
+
+class Scoreboard {
+    scoreTeam1: number;
+    scoreTeam2: number;
+    serve: boolean | null;
+
+    constructor(scoreTeam1: number, scoreTeam2: number, serve: boolean | null) {
+        this.scoreTeam1 = scoreTeam1;
+        this.scoreTeam2 = scoreTeam2;
+        this.serve = serve;
+    }
+}
+
+var stack = new Stack<Scoreboard>();
+stack.push(new Scoreboard(0, 0, null));
 
 function Home() {
 
-    const [scoreTeam1, setScoreteam1] = useState<number>(0);
-    const [scoreTeam2, setScoreteam2] = useState<number>(0);
-    const [service, setService] = useState<boolean | null>(null);
+    const [scoreTeam1, setScoreteam1] = useState<number | undefined>(0);
+    const [scoreTeam2, setScoreteam2] = useState<number | undefined>(0);
+    const [serve, setServe] = useState<boolean | null | undefined>(null);
     const [teamName1, setTeamName1] = useState<string>("Equipo 1");
-    const [teamName2, setTeamName2] = useState<string>("Equipo 2");
+    const [teamName2, setTeamName2] = useState<string>("Equipo 2");    
 
     const point = (team: number) => {
-        if (service == null && team == 1) {
-            setService(true)
-        } else if (service == null && team == 2) {
-            setService(false)
-        } else if (service && team == 1) {
-            setScoreteam1(scoreTeam1 + 1)
-        } else if (!service && team == 2) {
-            setScoreteam2(scoreTeam2 + 1)
-        } else{
-            setService(!service)
+        const newScore = new Scoreboard(scoreTeam1!, scoreTeam2!, serve!);
+        if (serve == null && team == 1) {
+            setServe(true)
+            newScore.serve = true;
+        } else if (serve == null && team == 2) {
+            setServe(false)
+            newScore.serve = false;
+        } else if (serve && team == 1) {
+            setScoreteam1(scoreTeam1! + 1)
+            newScore.scoreTeam1 = scoreTeam1! + 1
+        } else if (!serve && team == 2) {
+            newScore.scoreTeam2 = scoreTeam2! + 1
+            setScoreteam2(scoreTeam2! + 1)
+        } else {
+            setServe(!serve)
+            newScore.serve = !serve;
         }
+        stack.push(newScore);
     }
 
     const restart = () => {
         setScoreteam1(0);
         setScoreteam2(0);
-        setService(null)
+        setServe(null)
+        stack.clear();
+        stack.push(new Scoreboard(0, 0, null));
+    }
+
+    const revert = () => {
+        if (stack.size() != 1) {
+            stack.pop();
+            const prevScore: Scoreboard | undefined = stack.peek();
+            setScoreteam1(prevScore?.scoreTeam1);
+            setScoreteam2(prevScore?.scoreTeam2);
+            setServe(prevScore?.serve)
+        }
     }
 
     return (
@@ -43,7 +78,7 @@ function Home() {
                     <p>{teamName2}</p>
                 </div>
             </div>
-            {(service != null && service) && <div className="flex justify-around w-full">
+            {(serve != null && serve) && <div className="flex justify-around w-full">
 
                 <div className="h-20 w-20 bg-service bg-cover">
                 </div>
@@ -52,7 +87,7 @@ function Home() {
 
             </div>
             }
-            {(service != null && !service) && <div className="flex justify-around w-full">
+            {(serve != null && !serve) && <div className="flex justify-around w-full">
 
                 <div className="h-20 w-20 bg-cover">
                 </div>
@@ -80,7 +115,7 @@ function Home() {
                     }} />
 
             </div>
-            <button className="rounded border border-black p-2 text-lg">Deshacer</button>
+            <button className="rounded border border-black p-2 text-lg" onClick={revert}>Deshacer</button>
             <button className="rounded border border-black p-2 text-lg" onClick={restart}>Reiniciar</button>
 
         </div>
